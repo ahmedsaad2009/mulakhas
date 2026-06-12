@@ -2,7 +2,7 @@
   "name": "ملخّص",
   "short_name": "ملخّص",
   "description": "لخّص أي رابط بالذكاء الاصطناعي",
-  "start_url": "/",
+  "start_url": "/mulakhas/",
   "display": "standalone",
   "background_color": "#0f0f0f",
   "theme_color": "#0f0f0f",
@@ -24,7 +24,7 @@
     }
   ],
   "share_target": {
-    "action": "/",
+    "action": "/mulakhas/",
     "method": "GET",
     "enctype": "application/x-www-form-urlencoded",
     "params": {
