@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ملخّص</title>
+  <meta name="theme-color" content="#0f0f0f" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+    :root {
+      --bg: #0f0f0f;
+      --surface: #181818;
+      --border: #2a2a2a;
+      --accent: #c8f06e;
+      --accent-dim: rgba(200, 240, 110, 0.12);
+      --text: #e8e8e8;
+      --text-dim: #888;
+      --text-faint: #444;
+      --red: #ff6b6b;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Sans Arabic', sans-serif;
+      font-weight: 400;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 20px 24px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+    }
+
+    .logo span {
+      color: var(--accent);
+    }
+
+    .settings-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .settings-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    main {
+      flex: 1;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .url-section label {
+      font-size: 12px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .url-input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    input[type="text"], input[type="password"] {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      width: 100%;
+      transition: border-color 0.2s;
+      direction: ltr;
+    }
+    input:focus { outline: none; border-color: var(--accent); }
+    input::placeholder { color: var(--text-faint); }
+
+    .btn {
+      background: var(--accent);
+      color: #0f0f0f;
+      border: none;
+      font-family: 'IBM Plex Sans Arabic', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 12px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.2s, transform 0.1s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn:hover { opacity: 0.88; }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .btn-ghost {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--text-dim); opacity: 1; }
+
+    .result-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: none;
+    }
+    .result-card.visible { display: block; }
+
+    .result-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .result-tag {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent);
+      background: var(--accent-dim);
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .result-body {
+      padding: 20px 18px;
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--text);
+    }
+
+    .result-body.loading {
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .result-url {
+      padding: 10px 18px 14px;
+      font-size: 12px;
+      color: var(--text-faint);
+      font-family: 'IBM Plex Mono', monospace;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      direction: ltr;
+    }
+
+    .error-card {
+      background: rgba(255,107,107,0.08);
+      border: 1px solid rgba(255,107,107,0.25);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      font-size: 14px;
+      color: var(--red);
+      display: none;
+    }
+    .error-card.visible { display: block; }
+
+    /* Settings overlay */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: none;
+      align-items: flex-end;
+    }
+    .overlay.open { display: flex; }
+
+    .settings-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: var(--radius) var(--radius) 0 0;
+      padding: 28px 24px 40px;
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .settings-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field-group label {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--text-faint);
+      line-height: 1.6;
+    }
+
+    .hint a { color: var(--accent); text-decoration: none; }
+
+    .key-saved {
+      font-size: 12px;
+      color: var(--accent);
+      display: none;
+    }
+
+    /* Empty state */
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 12px;
+      padding: 40px 0;
+      color: var(--text-faint);
+    }
+
+    .empty-icon {
+      font-size: 40px;
+      opacity: 0.4;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      line-height: 1.7;
+      max-width: 260px;
+    }
+
+    .install-hint {
+      background: var(--accent-dim);
+      border: 1px solid rgba(200,240,110,0.2);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.7;
+      display: none;
+    }
+    .install-hint strong { color: var(--accent); }
+
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">ملخّ<span>ص</span></div>
+  <button class="settings-btn" onclick="openSettings()">⚙</button>
+</header>
+
+<main>
+  <div class="url-section">
+    <label>رابط الفيديو أو الموقع</label>
+    <div class="url-input-row">
+      <input type="text" id="urlInput" placeholder="https://youtube.com/..." />
+      <button class="btn" id="summarizeBtn" onclick="summarize()">لخّص</button>
+    </div>
+  </div>
+
+  <div class="install-hint" id="installHint">
+    💡 عشان الـ Share من يوتيوب يشتغل مباشرةً:<br/>
+    <strong>Safari → Share → Add to Home Screen</strong>، وبعدين افتح التطبيق من الهوم سكرين
+  </div>
+
+  <div class="error-card" id="errorCard"></div>
+
+  <div class="result-card" id="resultCard">
+    <div class="result-header">
+      <span class="result-tag">ملخّص</span>
+      <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px;" onclick="copyResult()">نسخ</button>
+    </div>
+    <div class="result-body" id="resultBody"></div>
+    <div class="result-url" id="resultUrl"></div>
+  </div>
+
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">✦</div>
+    <p>شير أي رابط من يوتيوب أو أي موقع وهيتلخصلك فوراً</p>
+  </div>
+</main>
+
+<!-- Settings Overlay -->
+<div class="overlay" id="overlay" onclick="closeSettingsIfOutside(event)">
+  <div class="settings-panel">
+    <div class="settings-title">الإعدادات</div>
+    <div class="field-group">
+      <label>Gemini API Key</label>
+      <input type="password" id="apiKeyInput" placeholder="AIza..." />
+      <p class="hint">
+        جيبه من <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a> — مجاني تماماً
+      </p>
+    </div>
+    <button class="btn" onclick="saveKey()">حفظ المفتاح</button>
+    <span class="key-saved" id="keySaved">✓ تم الحفظ</span>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'gemini_api_key';
+
+  // Load saved key
+  window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) document.getElementById('apiKeyInput').value = saved;
+
+    // Check if opened via share
+    const params = new URLSearchParams(window.location.search);
+    const sharedUrl = params.get('url') || params.get('text') || params.get('title');
+    
+    if (sharedUrl) {
+      document.getElementById('urlInput').value = sharedUrl;
+      document.getElementById('emptyState').style.display = 'none';
+      if (saved) {
+        summarize();
+      } else {
+        openSettings();
+      }
+    }
+
+    // Show install hint if not standalone
+    if (!window.matchMedia('(display-mode: standalone)').matches) {
+      document.getElementById('installHint').style.display = 'block';
+    }
+  });
+
+  function openSettings() {
+    document.getElementById('overlay').classList.add('open');
+  }
+
+  function closeSettingsIfOutside(e) {
+    if (e.target === document.getElementById('overlay')) {
+      document.getElementById('overlay').classList.remove('open');
+    }
+  }
+
+  function saveKey() {
+    const key = document.getElementById('apiKeyInput').value.trim();
+    if (!key) return;
+    localStorage.setItem(STORAGE_KEY, key);
+    const saved = document.getElementById('keySaved');
+    saved.style.display = 'inline';
+    setTimeout(() => {
+      saved.style.display = 'none';
+      document.getElementById('overlay').classList.remove('open');
+    }, 1200);
+  }
+
+  async function summarize() {
+    const url = document.getElementById('urlInput').value.trim();
+    const apiKey = localStorage.getItem(STORAGE_KEY);
+    const btn = document.getElementById('summarizeBtn');
+
+    if (!url) return showError('ضع رابطاً أولاً');
+    if (!apiKey) { openSettings(); return; }
+
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('errorCard').classList.remove('visible');
+    
+    const resultCard = document.getElementById('resultCard');
+    const resultBody = document.getElementById('resultBody');
+    const resultUrl = document.getElementById('resultUrl');
+    
+    resultCard.classList.add('visible');
+    resultBody.className = 'result-body loading';
+    resultBody.innerHTML = '<div class="spinner"></div> جاري التلخيص...';
+    resultUrl.textContent = url;
+    btn.disabled = true;
+
+    const prompt = `أنت مساعد ذكي متخصص في تلخيص المحتوى.
+
+الرابط التالي شاركه المستخدم: ${url}
+
+قم بالتالي:
+1. إذا كان رابط يوتيوب: اذكر أن التلخيص يعتمد على عنوان/وصف الرابط لأنك لا تستطيع تشغيل الفيديو، ثم قدّم ما يمكنك استنتاجه
+2. إذا كان رابط موقع أو مقال: لخّصه بشكل مفيد
+
+**قدّم ملخصاً عربياً واضحاً يحتوي على:**
+- 🎯 الفكرة الرئيسية (جملة واحدة)
+- 📌 أهم 3 نقاط
+- 💡 لماذا يستحق الاهتمام؟
+
+كن مختصراً ومفيداً. استخدم العربية الفصيحة البسيطة.`;
+
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 800 }
+        })
+      });
+
+      const data = await res.json();
+      
+      if (data.error) throw new Error(data.error.message);
+      
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) throw new Error('لم يرد الذكاء الاصطناعي بنتيجة');
+
+      resultBody.className = 'result-body';
+      resultBody.innerHTML = formatText(text);
+
+    } catch (err) {
+      resultCard.classList.remove('visible');
+      showError('حصل خطأ: ' + (err.message || 'تحقق من الـ API Key'));
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function formatText(text) {
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br/>');
+  }
+
+  function showError(msg) {
+    const card = document.getElementById('errorCard');
+    card.textContent = msg;
+    card.classList.add('visible');
+    document.getElementById('emptyState').style.display = 'none';
+  }
+
+  function copyResult() {
+    const text = document.getElementById('resultBody').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = event.target;
+      btn.textContent = 'تم ✓';
+      setTimeout(() => btn.textContent = 'نسخ', 1500);
+    });
+  }
+
+  // Register Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+</body>
+</html>
